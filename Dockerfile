@@ -46,7 +46,7 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-d
 #############################
 # Node go brrr
 #############################
-FROM node:20 AS assets
+FROM node:23 AS assets
 
 WORKDIR /app
 
