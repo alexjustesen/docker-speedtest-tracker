@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+    labels:
+      - "🐋 docker"
+    reviewers:
+      - "alexjustesen"
+    commit-message:
+      prefix: "docker"
