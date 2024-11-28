@@ -1,0 +1,62 @@
+#############################
+# Base image
+#############################
+FROM serversideup/php:8.3-fpm-nginx-alpine-v3.5.1 AS base
+
+LABEL org.opencontainers.image.title="speedtest-tracker-docker" \
+    org.opencontainers.image.authors="Alex Justesen (@alexjustesen)"
+
+ARG RELEASE_TAG="latest"
+
+ENV AUTORUN_ENABLED="TRUE" \
+    AUTORUN_LARAVEL_MIGRATION_ISOLATION="true" \
+    SHOW_WELCOME_MESSAGE="false"
+
+# Switch to root so we can do root things
+USER root
+
+# Install the intl extension with root permissions
+RUN install-php-extensions intl
+
+# Drop back to our unprivileged user
+USER www-data
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Fetch the appropriate release
+RUN set -e; \
+    if [ "${RELEASE_TAG}" = "current" ]; then \
+        wget https://github.com/alexjustesen/speedtest-tracker/archive/refs/heads/main.tar.gz \
+        && tar -xzvf main.tar.gz --strip-components=1 \
+        && rm main.tar.gz; \
+    elif [ "${RELEASE_TAG}" = "latest" ]; then \
+        LATEST_RELEASE=$(wget -q -O - https://api.github.com/repos/alexjustesen/speedtest-tracker/releases/latest | jq -r .tag_name) \
+        && wget https://github.com/alexjustesen/speedtest-tracker/archive/refs/tags/${LATEST_RELEASE}.tar.gz \
+        && tar -xzvf ${LATEST_RELEASE}.tar.gz --strip-components=1 \
+        && rm ${LATEST_RELEASE}.tar.gz; \
+    else \
+        wget https://github.com/alexjustesen/speedtest-tracker/archive/refs/tags/${RELEASE_TAG}.tar.gz \
+        && tar -xzvf ${RELEASE_TAG}.tar.gz --strip-components=1 \
+        && rm ${RELEASE_TAG}.tar.gz; \
+    fi
+
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+#############################
+# Node go brrr
+#############################
+FROM node:20 AS assets
+
+WORKDIR /app
+
+COPY --from=base /var/www/html /app
+
+RUN npm ci && npm run build
+
+#############################
+# Production image
+#############################
+FROM base AS production
+
+COPY --chown=www-data:www-data --from=assets /app/public/build /var/www/html/public/build
