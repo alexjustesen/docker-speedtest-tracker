@@ -7,6 +7,7 @@ WIP to build my own image again. This image is build off https://serversideup.ne
 This image is designed to work as a contained service and separates out the task scheduler and queue worker to separate containers.
 
 ```yaml
+# docker-compose.yml
 services:
     php:
         image: speedtest-tracker-docker:latest
@@ -19,7 +20,7 @@ services:
             - APP_URL=http://localhost
             - DB_CONNECTION= # use: mariadb, mysql or pgsql
             - DB_HOST=db
-            - DB_PORT= # use: 3306 for mariadb and mysql,
+            - DB_PORT= # use: 3306 for mariadb and mysql, 5432 for pgsql
             - DB_DATABASE=
             - DB_USERNAME=
             - DB_PASSWORD=
