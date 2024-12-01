@@ -9,9 +9,9 @@ LABEL org.opencontainers.image.title="speedtest-tracker-docker" \
 ARG CLI_VERSION="1.2.0" \
     RELEASE_TAG="latest"
 
-ENV AUTORUN_ENABLED="TRUE" \
+ENV AUTORUN_ENABLED="true" \
     AUTORUN_LARAVEL_MIGRATION_ISOLATION="true" \
-    # PHP_OPCACHE_ENABLE="1" \
+    PHP_OPCACHE_ENABLE="1" \
     SHOW_WELCOME_MESSAGE="false"
 
 # Switch to root so we can do root things
