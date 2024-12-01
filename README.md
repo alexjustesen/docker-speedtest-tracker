@@ -4,7 +4,7 @@ WIP to build my own image again. This image is build off https://serversideup.ne
 
 ### Using
 
-This image is designed to work as a contained service and separates out the task scheduler and queue worker to separate containers.
+This image is designed to work as a service and separates out the app, task scheduler and queue worker into separate service containers.
 
 ```yaml
 # docker-compose.yml
