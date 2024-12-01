@@ -1,7 +1,7 @@
 #############################
 # Base image
 #############################
-FROM serversideup/php:8.3-fpm-nginx-alpine-v3.5.1 AS base
+FROM serversideup/php:8.4-fpm-nginx-alpine-v3.5.1 AS base
 
 LABEL org.opencontainers.image.title="speedtest-tracker-docker" \
     org.opencontainers.image.authors="Alex Justesen (@alexjustesen)"
