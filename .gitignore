@@ -2,3 +2,4 @@
 /.idea
 /.vscode
 docker-compose.yml
+*.env
