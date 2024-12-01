@@ -6,14 +6,24 @@ FROM serversideup/php:8.3-fpm-nginx-alpine-v3.5.1 AS base
 LABEL org.opencontainers.image.title="speedtest-tracker-docker" \
     org.opencontainers.image.authors="Alex Justesen (@alexjustesen)"
 
-ARG RELEASE_TAG="latest"
+ARG CLI_VERSION="1.2.0" \
+    RELEASE_TAG="latest"
 
 ENV AUTORUN_ENABLED="TRUE" \
     AUTORUN_LARAVEL_MIGRATION_ISOLATION="true" \
+    # PHP_OPCACHE_ENABLE="1" \
     SHOW_WELCOME_MESSAGE="false"
 
 # Switch to root so we can do root things
 USER root
+
+# Install Speedtest CLI
+RUN curl -o \
+        /tmp/speedtest-cli.tgz -L \
+        "https://install.speedtest.net/app/cli/ookla-speedtest-${CLI_VERSION}-linux-x86_64.tgz" && \
+    tar xzf \
+        /tmp/speedtest-cli.tgz -C \
+        /usr/bin
 
 # Install the intl extension with root permissions
 RUN install-php-extensions intl
