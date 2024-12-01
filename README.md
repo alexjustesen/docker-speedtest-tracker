@@ -77,7 +77,7 @@ db:
     volumes:
         - 'db:/var/lib/mysql'
     networks:
-        - sail
+        - speedtest
     healthcheck:
         test:
             - CMD
@@ -111,6 +111,7 @@ db:
             - '-p${DB_PASSWORD}'
         retries: 3
         timeout: 5s
+
 # postgres
 db:
     image: 'postgres:17'
