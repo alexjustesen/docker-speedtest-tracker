@@ -141,7 +141,7 @@ db:
 
 ### Build
 
-Use the `build` script to build the version you want to use. Use either a tagged version like `v0.24.0` or `latest`, if you don't specify a tag it will pull the main branch.
+Use the `build` script to build the version you want to use. Use either a tagged version like `v1.0.0` or `latest`, if you don't specify a tag it will pull the main branch.
 
 ```bash
 # Build with current main branch
