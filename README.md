@@ -1,5 +1,13 @@
 ## Speedtest Tracker Docker
 
+> [!INFO]
+> **Work in Progress** - This is a custom Docker image build based on [ServerSideUp's Docker PHP](https://serversideup.net/open-source/docker-php/).
+>
+> This image separates the application into multiple services:
+> - **Main App** (PHP/Web server)
+> - **Task Scheduler** (Cron jobs)
+> - **Queue Worker** (Background jobs)
+
 WIP to build my own image again. This image is build off https://serversideup.net/open-source/docker-php/.
 
 ### Using
