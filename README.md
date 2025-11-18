@@ -16,9 +16,10 @@ This image is designed to work as a service and separates the app from the task 
 # docker-compose.yml
 services:
     php:
-        image: alexjustesen/speedtest-tracker:latest
+        image: speedtest-tracker-docker:latest
         ports:
             - 80:8080
+            # - 443:8443
         networks:
             - speedtest
         environment:
@@ -36,7 +37,7 @@ services:
             - queue
 
     task:
-        image: alexjustesen/speedtest-tracker:latest
+        image: speedtest-tracker-docker:latest
         command: ["php", "/var/www/html/artisan", "schedule:work"]
         stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
         healthcheck:
@@ -46,7 +47,7 @@ services:
             - speedtest
 
     queue:
-        image: alexjustesen/speedtest-tracker:latest
+        image: speedtest-tracker-docker:latest
         command: ["php", "/var/www/html/artisan", "queue:work", "--tries=3"]
         stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
         healthcheck:
@@ -55,9 +56,8 @@ services:
         networks:
             - speedtest
 
-    # Add your database here
     db:
-        image: 'postgres:17-alpine'
+        image: 'postgres:18-alpine'
         ports:
             - '${FORWARD_DB_PORT:-5432}:5432'
         environment:
