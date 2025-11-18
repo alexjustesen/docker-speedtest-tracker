@@ -1,4 +1,4 @@
-## Speedtest Tracker Docker
+# 🐋 Speedtest Tracker Docker
 
 > [!INFO]
 > **Work in Progress** - This is a custom Docker image build based on [ServerSideUp's Docker PHP](https://serversideup.net/open-source/docker-php/).
@@ -8,17 +8,15 @@
 > - **Task Scheduler** (Cron jobs)
 > - **Queue Worker** (Background jobs)
 
-WIP to build my own image again. This image is build off https://serversideup.net/open-source/docker-php/.
-
 ### Using
 
-This image is designed to work as a service and separates out the app, task scheduler and queue worker into separate service containers.
+This image is designed to work as a service and separates the app from the task scheduler and queue worker into separate service containers.
 
 ```yaml
 # docker-compose.yml
 services:
     php:
-        image: speedtest-tracker-docker:latest
+        image: alexjustesen/speedtest-tracker:latest
         ports:
             - 80:8080
         networks:
@@ -26,11 +24,11 @@ services:
         environment:
             - APP_KEY=
             - APP_URL=http://localhost
-            - DB_CONNECTION= # use: mariadb, mysql or pgsql
+            - DB_CONNECTION=pgsql
             - DB_HOST=db
-            - DB_PORT= # use: 3306 for mariadb and mysql, 5432 for pgsql
-            - DB_DATABASE=
-            - DB_USERNAME=
+            - DB_PORT=5432
+            - DB_DATABASE=speedtest
+            - DB_USERNAME=speedtest
             - DB_PASSWORD=
         depends_on:
             - db
@@ -38,7 +36,7 @@ services:
             - queue
 
     task:
-        image: speedtest-tracker-docker:latest
+        image: alexjustesen/speedtest-tracker:latest
         command: ["php", "/var/www/html/artisan", "schedule:work"]
         stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
         healthcheck:
@@ -48,7 +46,7 @@ services:
             - speedtest
 
     queue:
-        image: speedtest-tracker-docker:latest
+        image: alexjustesen/speedtest-tracker:latest
         command: ["php", "/var/www/html/artisan", "queue:work", "--tries=3"]
         stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
         healthcheck:
@@ -58,6 +56,30 @@ services:
             - speedtest
 
     # Add your database here
+    db:
+        image: 'postgres:17-alpine'
+        ports:
+            - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'db:/var/lib/postgresql/data'
+        networks:
+            - speedtest
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE}'
+                - '-U'
+                - '${DB_USERNAME}'
+            retries: 3
+            timeout: 5s
 
 networks:
     speedtest:
@@ -65,86 +87,6 @@ networks:
 volumes:
     db:
         driver: local
-```
-
-#### Chose a database
-
-```yaml
-#mariadb
-db:
-    image: 'mariadb:11'
-    ports:
-        - '${FORWARD_DB_PORT:-3306}:3306'
-    environment:
-        MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ROOT_HOST: '%'
-        MYSQL_DATABASE: '${DB_DATABASE}'
-        MYSQL_USER: '${DB_USERNAME}'
-        MYSQL_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-    volumes:
-        - 'db:/var/lib/mysql'
-    networks:
-        - speedtest
-    healthcheck:
-        test:
-            - CMD
-            - healthcheck.sh
-            - '--connect'
-            - '--innodb_initialized'
-        retries: 3
-        timeout: 5s
-
-# mysql
-db:
-    image: 'mysql/mysql-server:8.0'
-    ports:
-        - '${FORWARD_DB_PORT:-3306}:3306'
-    environment:
-        MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ROOT_HOST: '%'
-        MYSQL_DATABASE: '${DB_DATABASE}'
-        MYSQL_USER: '${DB_USERNAME}'
-        MYSQL_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ALLOW_EMPTY_PASSWORD: 1
-    volumes:
-        - 'db:/var/lib/mysql'
-    networks:
-        - speedtest
-    healthcheck:
-        test:
-            - CMD
-            - mysqladmin
-            - ping
-            - '-p${DB_PASSWORD}'
-        retries: 3
-        timeout: 5s
-
-# postgres
-db:
-    image: 'postgres:17'
-    ports:
-        - '${FORWARD_DB_PORT:-5432}:5432'
-    environment:
-        PGPASSWORD: '${DB_PASSWORD:-secret}'
-        POSTGRES_DB: '${DB_DATABASE}'
-        POSTGRES_USER: '${DB_USERNAME}'
-        POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
-    volumes:
-        - 'db:/var/lib/postgresql/data'
-    networks:
-        - speedtest
-    healthcheck:
-        test:
-            - CMD
-            - pg_isready
-            - '-q'
-            - '-d'
-            - '${DB_DATABASE}'
-            - '-U'
-            - '${DB_USERNAME}'
-        retries: 3
-        timeout: 5s
 ```
 
 ### Build
