@@ -1,3 +1,5 @@
 /.github
 build.sh
+compose.yaml
+docker-compose.yaml
 README.md
