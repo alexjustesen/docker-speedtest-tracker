@@ -27,7 +27,7 @@ RUN curl -o \
         /usr/bin
 
 # Install the intl extension with root permissions
-RUN install-php-extensions intl
+RUN install-php-extensions gd intl
 
 # Drop back to our unprivileged user
 USER www-data
