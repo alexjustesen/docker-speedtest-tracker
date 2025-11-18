@@ -13,7 +13,7 @@
 This image is designed to work as a service and separates the app from the task scheduler and queue worker into separate service containers.
 
 ```yaml
-# docker-compose.yml
+# compose.yml
 services:
     php:
         image: speedtest-tracker-docker:latest
