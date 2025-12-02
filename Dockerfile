@@ -1,33 +1,51 @@
 #############################
 # Base image
 #############################
-FROM serversideup/php:8.4-fpm-nginx-alpine AS base
+FROM serversideup/php:8.4-fpm-nginx-alpine-v4.2.1 AS base
 
 LABEL org.opencontainers.image.title="speedtest-tracker-docker" \
     org.opencontainers.image.authors="Alex Justesen (@alexjustesen)"
 
-ARG CLI_VERSION="1.2.0" \
+ARG LIBRESPEED_CLI_VERSION="1.0.12" \
+    OOKLA_CLI_VERSION="1.2.0" \
     RELEASE_TAG="latest"
 
 ENV AUTORUN_ENABLED="true" \
     AUTORUN_LARAVEL_MIGRATION="true" \
     AUTORUN_LARAVEL_MIGRATION_ISOLATION="true" \
+    PHP_MEMORY_LIMIT="512M" \
     PHP_OPCACHE_ENABLE="1" \
     SHOW_WELCOME_MESSAGE="false"
 
 # Switch to root so we can do root things
 USER root
 
+# Install jq for parsing GitHub API responses and iperf for network testing
+RUN apk add --no-cache jq iperf3
+
+# Install LibreSpeed CLI
+RUN curl -o \
+        /tmp/librespeed-cli.tgz -L \
+        "https://github.com/librespeed/speedtest-cli/releases/download/v${LIBRESPEED_CLI_VERSION}/librespeed-cli_${LIBRESPEED_CLI_VERSION}_linux_amd64.tar.gz" && \
+    tar xzf \
+        /tmp/librespeed-cli.tgz -C \
+        /usr/bin \
+    && rm /tmp/librespeed-cli.tgz
+
+
 # Install Speedtest CLI
 RUN curl -o \
         /tmp/speedtest-cli.tgz -L \
-        "https://install.speedtest.net/app/cli/ookla-speedtest-${CLI_VERSION}-linux-x86_64.tgz" && \
+        "https://install.speedtest.net/app/cli/ookla-speedtest-${OOKLA_CLI_VERSION}-linux-x86_64.tgz" && \
     tar xzf \
         /tmp/speedtest-cli.tgz -C \
-        /usr/bin
+        /usr/bin \
+    && rm /tmp/speedtest-cli.tgz
 
 # Install the intl extension with root permissions
-RUN install-php-extensions gd intl
+RUN install-php-extensions intl \
+    && rm -rf /var/cache/apk/* \
+    && rm -rf /tmp/*
 
 # Drop back to our unprivileged user
 USER www-data
