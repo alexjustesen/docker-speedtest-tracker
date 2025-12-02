@@ -1,0 +1,19 @@
+#!/command/with-contenv bash
+
+# Change to the application directory
+cd /var/www/html
+
+# Handle shutdown gracefully
+shutdown() {
+    echo "Received shutdown signal, exiting..."
+    exit 0
+}
+
+trap shutdown SIGTERM SIGINT
+
+# Run the Laravel scheduler every minute
+while true; do
+    s6-setuidgid www-data php artisan schedule:run --verbose --no-interaction
+    sleep 60 &
+    wait $!
+done

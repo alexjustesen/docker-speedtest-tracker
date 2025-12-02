@@ -2,15 +2,8 @@
 
 > [!INFO]
 > **Work in Progress** - This is a custom Docker image build based on [ServerSideUp's Docker PHP](https://serversideup.net/open-source/docker-php/).
->
-> This image separates the application into multiple services:
-> - **Main App** (PHP/Web server)
-> - **Task Scheduler** (Cron jobs)
-> - **Queue Worker** (Background jobs)
 
 ### Using
-
-This image is designed to work as a service and separates the app from the task scheduler and queue worker into separate service containers.
 
 ```yaml
 # compose.yml
@@ -33,28 +26,6 @@ services:
             - DB_PASSWORD=
         depends_on:
             - db
-            - task
-            - queue
-
-    task:
-        image: speedtest-tracker-docker:latest
-        command: ["php", "/var/www/html/artisan", "schedule:work"]
-        stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
-        healthcheck:
-            test: ["CMD", "healthcheck-schedule"]
-            start_period: 10s
-        networks:
-            - speedtest
-
-    queue:
-        image: speedtest-tracker-docker:latest
-        command: ["php", "/var/www/html/artisan", "queue:work", "--tries=3"]
-        stop_signal: SIGTERM # Set this for graceful shutdown if you're using fpm-apache or fpm-nginx
-        healthcheck:
-            test: ["CMD", "healthcheck-queue"]
-            start_period: 10s
-        networks:
-            - speedtest
 
     db:
         image: 'postgres:18-alpine'

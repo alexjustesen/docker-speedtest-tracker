@@ -111,6 +111,9 @@ RUN set -e; \
 RUN install-php-extensions intl \
     && rm -rf /tmp/*
 
+# Copy s6 service definitions for Laravel scheduler and queue worker
+COPY --chmod=755 root /
+
 # Drop back to our unprivileged user
 USER www-data
 
