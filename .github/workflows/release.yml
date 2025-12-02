@@ -44,7 +44,7 @@ jobs:
             type=semver,pattern={{version}},value=${{ github.event.client_payload.tag_name || inputs.release_tag }}
             type=semver,pattern={{major}}.{{minor}},value=${{ github.event.client_payload.tag_name || inputs.release_tag }}
             type=semver,pattern={{major}},value=${{ github.event.client_payload.tag_name || inputs.release_tag }}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ !contains(github.event.client_payload.tag_name || inputs.release_tag, '-') }}
 
       - name: Determine release tag
         id: release-tag
