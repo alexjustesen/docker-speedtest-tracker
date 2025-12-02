@@ -59,8 +59,6 @@ jobs:
             exit 1
           fi
 
-          # Remove 'v' prefix if present
-          RELEASE_TAG="${RELEASE_TAG#v}"
           echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
           echo "Using release tag: ${RELEASE_TAG}"
 
