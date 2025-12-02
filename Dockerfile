@@ -20,31 +20,21 @@ ENV AUTORUN_ENABLED="true" \
 # Switch to root so we can do root things
 USER root
 
-# Install jq for parsing GitHub API responses and iperf for network testing
-RUN apk add --no-cache jq iperf3
+# Install system dependencies and clean up in the same layer
+RUN apk add --no-cache jq iperf3 \
+    && rm -rf /var/cache/apk/*
 
-# Install LibreSpeed CLI
-RUN curl -o \
-        /tmp/librespeed-cli.tgz -L \
-        "https://github.com/librespeed/speedtest-cli/releases/download/v${LIBRESPEED_CLI_VERSION}/librespeed-cli_${LIBRESPEED_CLI_VERSION}_linux_amd64.tar.gz" && \
-    tar xzf \
-        /tmp/librespeed-cli.tgz -C \
-        /usr/bin \
-    && rm /tmp/librespeed-cli.tgz
-
-
-# Install Speedtest CLI
-RUN curl -o \
-        /tmp/speedtest-cli.tgz -L \
-        "https://install.speedtest.net/app/cli/ookla-speedtest-${OOKLA_CLI_VERSION}-linux-x86_64.tgz" && \
-    tar xzf \
-        /tmp/speedtest-cli.tgz -C \
-        /usr/bin \
-    && rm /tmp/speedtest-cli.tgz
+# Install CLI tools in a single layer
+RUN curl -o /tmp/librespeed-cli.tgz -L \
+        "https://github.com/librespeed/speedtest-cli/releases/download/v${LIBRESPEED_CLI_VERSION}/librespeed-cli_${LIBRESPEED_CLI_VERSION}_linux_amd64.tar.gz" \
+    && curl -o /tmp/speedtest-cli.tgz -L \
+        "https://install.speedtest.net/app/cli/ookla-speedtest-${OOKLA_CLI_VERSION}-linux-x86_64.tgz" \
+    && tar xzf /tmp/librespeed-cli.tgz -C /usr/bin \
+    && tar xzf /tmp/speedtest-cli.tgz -C /usr/bin \
+    && rm /tmp/librespeed-cli.tgz /tmp/speedtest-cli.tgz
 
 # Install the intl extension with root permissions
 RUN install-php-extensions intl \
-    && rm -rf /var/cache/apk/* \
     && rm -rf /tmp/*
 
 # Drop back to our unprivileged user
@@ -70,18 +60,20 @@ RUN set -e; \
         && rm ${RELEASE_TAG}.tar.gz; \
     fi
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+RUN --mount=type=cache,target=/tmp/cache \
+    COMPOSER_CACHE_DIR=/tmp/cache composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
 #############################
 # Node go brrr
 #############################
-FROM node:24 AS assets
+FROM node:24-alpine AS assets
 
 WORKDIR /app
 
 COPY --from=base /var/www/html /app
 
-RUN npm ci && npm run build
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci && npm run build
 
 #############################
 # Production image
