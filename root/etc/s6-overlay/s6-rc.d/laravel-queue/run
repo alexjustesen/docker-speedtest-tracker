@@ -1,7 +1,7 @@
-#!/command/with-contenv bash
+#!/bin/sh
 
 # Change to the application directory
 cd /var/www/html
 
 # Run the Laravel queue worker
-exec s6-setuidgid www-data php artisan queue:work --verbose --sleep=5 --tries=3
+php artisan queue:work --sleep=5 --tries=3
