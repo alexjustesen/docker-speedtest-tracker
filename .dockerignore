@@ -1,4 +1,6 @@
+/.claude
 /.github
+/docs
 build.sh
 compose.yaml
 docker-compose.yaml
