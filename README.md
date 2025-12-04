@@ -3,13 +3,15 @@
 > [!INFO]
 > **Work in Progress** - This is a custom Docker image build based on [ServerSideUp's Docker PHP](https://serversideup.net/open-source/docker-php/).
 
+This build supports both `amd64` and `arm64`, 32-bit images are not supported.
+
 ### Using
 
 ```yaml
 # compose.yml
 services:
     php:
-        image: speedtest-tracker-docker:latest
+        image: ghcr.io/alexjustesen/docker-speedtest-tracker:latest
         ports:
             - 80:8080
             # - 443:8443
@@ -62,7 +64,7 @@ volumes:
 
 ### Build
 
-Use the `build` script to build the version you want to use. Use either a tagged version like `v1.0.0` or `latest`, if you don't specify a tag it will pull the main branch.
+Clone the repository and use the `build` script to build the version you want to use. Use either a tagged version like `v1.0.0` or `latest`, if you don't specify a tag it will pull the main branch.
 
 ```bash
 # Build with current main branch
