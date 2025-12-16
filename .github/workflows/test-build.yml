@@ -2,13 +2,9 @@ name: Test Docker Builds
 
 on:
   push:
-    branches:
-      - '**'
     branches-ignore:
       - main
   pull_request:
-    branches:
-      - '**'
     branches-ignore:
       - main
   workflow_dispatch:
