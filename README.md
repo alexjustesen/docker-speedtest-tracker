@@ -1,9 +1,9 @@
 # 🐋 Speedtest Tracker Docker
 
-> [!INFO]
-> **Work in Progress** - This is a custom Docker image build based on [ServerSideUp's Docker PHP](https://serversideup.net/open-source/docker-php/).
+> [!WARNING]
+> These Docker images are under construction, use at your own risk..
 
-This build supports both `amd64` and `arm64`, 32-bit images are not supported.
+This image is based on [ServerSideUp's Docker PHP](https://serversideup.net/open-source/docker-php/) which is the gold standard for containerized PHP applications. These builds supports both `x86-64` and `arm64` architectures, 32-bit images are not and will not be supported.
 
 ### Using
 
