@@ -87,7 +87,7 @@ ENV AUTORUN_ENABLED="true" \
 USER root
 
 # Install system dependencies and clean up in the same layer
-RUN apk add --no-cache jq iperf3 \
+RUN apk add --no-cache jq iperf3 iputils \
     && rm -rf /var/cache/apk/*
 
 # Install CLI tools in a single layer
