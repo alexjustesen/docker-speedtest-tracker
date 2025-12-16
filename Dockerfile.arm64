@@ -1,7 +1,7 @@
 #############################
 # Download source code (platform-independent)
 #############################
-FROM alpine:latest AS source
+FROM --platform=$BUILDPLATFORM alpine:latest AS source
 
 ARG RELEASE_TAG="latest"
 
@@ -30,7 +30,7 @@ RUN set -e; \
 #############################
 # Install Composer dependencies (platform-independent)
 #############################
-FROM serversideup/php:8.4-fpm-nginx-alpine-v4.2.1 AS dependencies
+FROM --platform=$BUILDPLATFORM serversideup/php:8.4-fpm-nginx-alpine-v4.2.1 AS dependencies
 
 USER root
 
@@ -56,7 +56,7 @@ USER www-data
 #############################
 # Build assets (platform-independent)
 #############################
-FROM node:24-alpine AS assets
+FROM --platform=$BUILDPLATFORM node:24-alpine AS assets
 
 WORKDIR /app
 
