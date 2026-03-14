@@ -4,4 +4,4 @@
 cd /var/www/html
 
 # Run the Laravel queue worker
-php artisan queue:work --sleep=5 --tries=3
+php artisan queue:work --quiet --sleep=5 --tries=3
