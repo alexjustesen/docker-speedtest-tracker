@@ -56,7 +56,7 @@ USER www-data
 #############################
 # Build assets (platform-independent)
 #############################
-FROM node:24-alpine AS assets
+FROM node:26-alpine AS assets
 
 WORKDIR /app
 
