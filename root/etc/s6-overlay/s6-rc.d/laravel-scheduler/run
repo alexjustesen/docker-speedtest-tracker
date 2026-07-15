@@ -4,4 +4,4 @@
 cd /var/www/html
 
 # Run the Laravel scheduler every minute
-php artisan schedule:work
+php artisan schedule:work --quiet
