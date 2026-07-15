@@ -1,0 +1,82 @@
+name: Scheduled Rebuild
+
+# Rebuilds the latest release image on a schedule so the published image
+# picks up patched base images (serversideup/php, alpine, node) and CLI tools
+# even when there is no new upstream speedtest-tracker release.
+on:
+  schedule:
+    # Weekly, Monday 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Determine latest upstream release tag
+        id: release-tag
+        run: |
+          RELEASE_TAG=$(curl -sf https://api.github.com/repos/alexjustesen/speedtest-tracker/releases/latest | jq -r .tag_name)
+          if [ -z "${RELEASE_TAG}" ] || [ "${RELEASE_TAG}" = "null" ]; then
+            echo "Failed to resolve latest release tag"
+            exit 1
+          fi
+          echo "release_tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
+          echo "Using release tag: ${RELEASE_TAG}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.release-tag.outputs.release_tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.release-tag.outputs.release_tag }}
+            type=semver,pattern={{major}},value=${{ steps.release-tag.outputs.release_tag }}
+            type=raw,value=latest,enable=${{ !contains(steps.release-tag.outputs.release_tag, '-') }}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            RELEASE_TAG=${{ steps.release-tag.outputs.release_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          no-cache: true
+
+      - name: Generate artifact attestation
+        if: github.repository_visibility == 'public' || github.repository_owner_type == 'Organization'
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
