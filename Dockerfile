@@ -30,7 +30,7 @@ RUN set -e; \
 #############################
 # Install Composer dependencies (platform-independent)
 #############################
-FROM serversideup/php:8.4-fpm-nginx-alpine-v4.2.1 AS dependencies
+FROM serversideup/php:8.5-fpm-nginx-alpine-v4.5.0 AS dependencies
 
 USER root
 
@@ -68,7 +68,7 @@ RUN --mount=type=cache,target=/root/.npm \
 #############################
 # Base image (amd64-specific)
 #############################
-FROM --platform=linux/amd64 serversideup/php:8.4-fpm-nginx-alpine-v4.2.1 AS base
+FROM --platform=linux/amd64 serversideup/php:8.5-fpm-nginx-alpine-v4.5.0 AS base
 
 LABEL org.opencontainers.image.title="speedtest-tracker-docker" \
     org.opencontainers.image.authors="Alex Justesen (@alexjustesen)"
